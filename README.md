@@ -1,6 +1,6 @@
 # HackSphere 🌍
 
-## <h3>Under Construction – Leaked Sneak Peeks Inside</h3>
+# <h3>Under Construction – Leaked Sneak Peeks Inside</h3>
 
 > **"Redefining the way developers discover hackathons. A global hackathon board, built by hackers for hackers."**
 
@@ -41,10 +41,10 @@
 ---
 
 ### 📸 Leaked Pictures (Sneak Preview)
-![image](https://github.com/user-attachments/assets/5a9cfdb3-41b2-4128-a356-a2f1c86c61b7)
-![image](https://github.com/user-attachments/assets/38b9e657-3853-4440-855b-86310c2c9e25)
-![image](https://github.com/user-attachments/assets/3e22e96d-8286-4b38-8739-9567116a8bfe)
-![image](https://github.com/user-attachments/assets/0328b4bb-708c-41d0-819b-a6a0ceb64823)
+![image](https://github.com/user-attachments/assets/a9f33c0a-037b-4366-a8c2-54145da3897e)
+![image](https://github.com/user-attachments/assets/c63f9354-a2f1-4581-bf4b-121e79de9d2d)
+![image](https://github.com/user-attachments/assets/6d1c53ef-b59e-4868-b686-c218c90cfb73)
+![image](https://github.com/user-attachments/assets/a4a00159-3e1b-41b5-96b7-c49fb56a4abe)
 
 ---
 
