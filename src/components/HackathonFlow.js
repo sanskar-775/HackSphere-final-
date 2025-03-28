@@ -1,8 +1,8 @@
-"use client";
-
 import { motion } from "framer-motion";
 import { ClipboardDocumentCheckIcon, CodeBracketSquareIcon, DocumentMagnifyingGlassIcon, TrophyIcon } from "@heroicons/react/24/outline";
-import MatrixText from "@/components/ui/MatrixText";
+import dynamic from "next/dynamic";
+
+const MatrixText = dynamic(() => import("@/components/ui/MatrixText"), { ssr: false });
 
 const hackathonFlow = [
     { icon: ClipboardDocumentCheckIcon, description: "Register for the hackathon and form your team." },
