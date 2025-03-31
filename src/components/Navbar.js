@@ -69,13 +69,12 @@ export default function Navbar() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
-                            <Button
-                                variant="outline"
-                                onClick={() => signIn("google", { callbackUrl: "/" })}
-                                className="text-gray-300 hover:text-primary"
-                            >
+                            <Link href="/auth/login">
+                            <Button variant="outline" className="text-gray-300 hover:text-primary">
                                 Login
                             </Button>
+                        </Link>
+                        
                         )}
 
                         {/* Dark Mode Toggle
@@ -114,9 +113,10 @@ export default function Navbar() {
                                         <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Logout</DropdownMenuItem>
                                     </>
                                 ) : (
-                                    <DropdownMenuItem onClick={() => signIn(undefined, { callbackUrl: "/" })}>
-                                        Login
+                                    <DropdownMenuItem asChild>
+                                    <Link href="/auth/login">Login</Link>
                                     </DropdownMenuItem>
+                                
                                 )}
                             </DropdownMenuContent>
                         </DropdownMenu>

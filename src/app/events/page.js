@@ -24,11 +24,13 @@ export default function EventsPage() {
     const fetchAllEvents = async () => {
       try {
         const res = await fetch("/api/fetch-events");
+        if (!res.ok) throw new Error("Failed to fetch");
         const data = await res.json();
-        setEvents(data);
+        setEvents(Array.isArray(data) ? data : []); // Ensure data is always an array
       } catch (err) {
         toast.error("Failed to load events.");
         console.error(err);
+        setEvents([]); // Set to empty array on error
       } finally {
         setLoading(false);
       }
@@ -37,20 +39,25 @@ export default function EventsPage() {
     fetchAllEvents();
   }, []);
 
-  const filteredEvents = events
-    .filter((event) =>
-      event.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Safely filter and sort events
+  const filteredEvents = (Array.isArray(events) ? events : [])
+    .filter((event) => 
+      event?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((event) =>
-      platformFilter === "All" ? true : event.platform === platformFilter
+      platformFilter === "All" ? true : event?.platform === platformFilter
     )
     .sort((a, b) => {
-      if (sortBy === "start") {
-        return new Date(a.startDate) - new Date(b.startDate);
-      } else if (sortBy === "end") {
-        return new Date(a.endDate) - new Date(b.endDate);
-      } else {
-        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      try {
+        if (sortBy === "start") {
+          return new Date(a?.startDate || 0) - new Date(b?.startDate || 0);
+        } else if (sortBy === "end") {
+          return new Date(a?.endDate || 0) - new Date(b?.endDate || 0);
+        } else {
+          return new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0);
+        }
+      } catch {
+        return 0;
       }
     });
 
@@ -104,11 +111,16 @@ export default function EventsPage() {
           ))}
         </div>
       ) : filteredEvents.length === 0 ? (
-        <p className="text-center text-gray-400">No events match your filters.</p>
+        <p className="text-center text-gray-400">
+          {events.length === 0 ? "No events available." : "No events match your filters."}
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredEvents.map((event) => (
-            <EventCard key={event.id || event.eventId} event={event} />
+            <EventCard 
+              key={event.id || event._id || Math.random().toString(36).substring(2,9)}
+              event={event} 
+            />
           ))}
         </div>
       )}

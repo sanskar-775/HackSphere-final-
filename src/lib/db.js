@@ -12,13 +12,23 @@ async function dbConnect() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }).then((mongoose) => mongoose);
+    console.log("🔄 Connecting to MongoDB...");
+    cached.promise = mongoose
+      .connect(MONGODB_URI, {
+        dbName: "HackSphere",
+      })
+      .then((mongoose) => {
+        console.log("✅ MongoDB Connected");
+        return mongoose;
+      })
+      .catch((err) => {
+        console.error("❌ MongoDB Connection Error:", err);
+        throw err;
+      });
   }
 
   cached.conn = await cached.promise;
+  global.mongoose = cached;
   return cached.conn;
 }
 
