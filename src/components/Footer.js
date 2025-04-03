@@ -19,22 +19,11 @@ export default function Footer() {
           </nav>
         </div>
         
-        {/* Newsletter Signup */}
-        <div className="mb-6 md:mb-0">
-          <h3 className="text-lg font-semibold">Subscribe to our Newsletter</h3>
-          <div className="flex mt-2">
-            <Input type="email" placeholder="Enter your email" className="w-full max-w-xs" />
-            <Button className="ml-2 bg-blue-500 hover:bg-blue-600">Subscribe</Button>
-          </div>
-        </div>
 
         {/* Social Media Icons */}
         <div className="flex space-x-6">
-          <a href="#" className="text-xl hover:text-blue-400">
+          <a href="https://github.com/sanskar-775/HackSphere-final-" className="text-xl hover:text-blue-400">
             <FaGithub />
-          </a>
-          <a href="#" className="text-xl hover:text-blue-400">
-            <FaTwitter />
           </a>
           <a href="#" className="text-xl hover:text-blue-400">
             <FaLinkedin />

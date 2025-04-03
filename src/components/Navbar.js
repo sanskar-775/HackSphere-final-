@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Menu } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { gsap } from "gsap";
 
 export default function Navbar() {
     const { data: session } = useSession(); // Get session data
@@ -34,12 +35,48 @@ export default function Navbar() {
         preloadPages(); // Call preload when Navbar loads
     }, []);
 
-    const toggleDarkMode = () => {
-        const newTheme = darkMode ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-        setDarkMode(!darkMode);
-    };
+    useEffect(() => {
+        function breakTheText() {
+            let h2 = document.querySelector("h2");
+            if (!h2) return;
+            
+            let h2Text = h2.textContent;
+            let splittedText = h2Text.split("");
+            let halfIndex = Math.floor(splittedText.length / 2);
+            let clutter = "";
+
+            splittedText.forEach((letter, idx) => {
+                if (idx <= halfIndex) {
+                    clutter += `<span class="a">${letter}</span>`;
+                } else {
+                    clutter += `<span class="b">${letter}</span>`;
+                }
+            });
+
+            h2.innerHTML = clutter;
+        }
+
+        breakTheText();
+
+        gsap.from("h2 .a", {
+            y: 70,
+            duration: 1,
+            delay: 0.3,
+            opacity: 0,
+            stagger: 0.15,
+        });
+
+        gsap.from("h2 .b", {
+            y: 70,
+            duration: 1,
+            delay: 0.3,
+            opacity: 0,
+            stagger: -0.15,
+        });
+    }, [])
+
+
+
 
     return (
         <nav className="fixed top-0 left-0 w-full bg-black/30 dark:bg-gray-900/30 backdrop-blur-lg shadow-md z-50">
@@ -47,21 +84,21 @@ export default function Navbar() {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <Link href="/" className="text-2xl font-bold text-primary">
-                        HackSphere
+                        <h2>HackSphere</h2>
                     </Link>
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex space-x-6 items-center">
-                        <Link href="/events" className="text-gray-300 hover:text-cyan-400">
+                        <Link href="/events" className="text-gray-300 hover:text-cyan-800 nav-link">
                             Events
                         </Link>
-                        <Link href="/about" className="text-gray-300 hover:text-cyan-400">
+                        <Link href="/about" className="text-gray-300 hover:text-cyan-800 nav-link">
                             About
                         </Link>
 
                         {/* Conditional Rendering of Host Link */}
                         {session?.user && (
-                            <Link href="/host" className="text-gray-300 hover:text-cyan-400">
+                            <Link href="/host" className="text-gray-300 hover:text-cyan-400 nav-link">
                                 Host
                             </Link>
                         )}
@@ -91,7 +128,7 @@ export default function Navbar() {
                             <Button
                                 variant="outline"
                                 onClick={() => signIn("google", { callbackUrl: "/" })}
-                                className="text-gray-300 hover:text-primary"
+                                className="text-gray-300 hover:text-blue-400 border-gray-300 hover:border-blue-400 bg-secondary"
                             >
                                 Login
                             </Button>

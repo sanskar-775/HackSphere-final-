@@ -63,7 +63,7 @@ export async function GET(req) {
       endDate: e.endDate,
       platform: e.opportunityType || "User",
       location: e.location || "Unknown",
-      image: e.image || "/global.jpg",
+      image: e.image || "/hacksphere/public/hacka.png",
       createdAt: e.createdAt || new Date(),
     }));
 
