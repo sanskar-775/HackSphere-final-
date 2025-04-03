@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession, signIn } from "next-auth/react"; // useSession hook from next-auth for session management
 import { toast } from "sonner";
 import Image from "next/image";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format, isBefore, isAfter, isPast } from "date-fns";
+import { format, isBefore, isPast } from "date-fns";
 
 const defaultState = {
   opportunityLogo: null,
@@ -37,11 +38,21 @@ const requiredFields = [
 const categoriesList = ["Tech", "Design", "Business", "AI", "Web", "Mobile"];
 
 export default function HostPage() {
+  const { data: session, status } = useSession(); // Get session data using useSession
   const [event, setEvent] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Redirect to login if no session
+  useEffect(() => {
+    if (status === "loading") return; // Wait for session loading
+    if (!session) {
+      toast.error("You must be logged in to host an event.");
+      signIn("google"); // Redirect to login page
+    }
+  }, [session, status]);
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
@@ -109,7 +120,7 @@ export default function HostPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-  
+
     setIsSubmitting(true);
     try {
       const formData = new FormData();
@@ -122,18 +133,17 @@ export default function HostPage() {
           formData.append(key, event[key]);
         }
       });
-  
+
       const res = await fetch("/api/events", {
         method: "POST",
         body: formData,
       });
-  
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to submit");
-  
-      // ✅ Show toast on success
+
       toast.success("🎉 Hackathon submitted successfully!");
-  
+
       setSuccess(true);
       setEvent(defaultState);
       setPreviewImage("");
@@ -143,7 +153,8 @@ export default function HostPage() {
       setIsSubmitting(false);
     }
   };
-  
+
+  if (status === "loading") return null; // Wait for session to load
 
   return (
     <div className="min-h-screen bg-base-200 py-10 px-4">
@@ -207,69 +218,61 @@ export default function HostPage() {
         </div>
 
         {/* Dates */}
-        {/* Dates (Using ShadCN Calendar) */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {/* Start Date */}
-  <div>
-    <label className="label">Start Date *</label>
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="input input-bordered w-full text-left"
-        >
-          {event.startDate ? format(new Date(event.startDate), "PPP") : "Pick a date"}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={event.startDate ? new Date(event.startDate) : undefined}
-          onSelect={(date) => {
-            if (isPast(date)) {
-              setErrors((prev) => ({ ...prev, startDate: "Start date cannot be in the past" }));
-              return;
-            }
-            setEvent({ ...event, startDate: date.toISOString() });
-            clearError("startDate");
-          }}
-        />
-      </PopoverContent>
-    </Popover>
-    {errors.startDate && <p className="text-error">{errors.startDate}</p>}
-  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Start Date */}
+          <div>
+            <label className="label">Start Date *</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" className="input input-bordered w-full text-left">
+                  {event.startDate ? format(new Date(event.startDate), "PPP") : "Pick a date"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={event.startDate ? new Date(event.startDate) : undefined}
+                  onSelect={(date) => {
+                    if (isPast(date)) {
+                      setErrors((prev) => ({ ...prev, startDate: "Start date cannot be in the past" }));
+                      return;
+                    }
+                    setEvent({ ...event, startDate: date.toISOString() });
+                    clearError("startDate");
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+            {errors.startDate && <p className="text-error">{errors.startDate}</p>}
+          </div>
 
-  {/* End Date */}
-  <div>
-    <label className="label">End Date *</label>
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="input input-bordered w-full text-left"
-        >
-          {event.endDate ? format(new Date(event.endDate), "PPP") : "Pick a date"}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={event.endDate ? new Date(event.endDate) : undefined}
-          onSelect={(date) => {
-            if (!event.startDate || isBefore(date, new Date(event.startDate))) {
-              setErrors((prev) => ({ ...prev, endDate: "End date must be after start date" }));
-              return;
-            }
-            setEvent({ ...event, endDate: date.toISOString() });
-            clearError("endDate");
-          }}
-        />
-      </PopoverContent>
-    </Popover>
-    {errors.endDate && <p className="text-error">{errors.endDate}</p>}
-    </div>
-    </div>
-
+          {/* End Date */}
+          <div>
+            <label className="label">End Date *</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" className="input input-bordered w-full text-left">
+                  {event.endDate ? format(new Date(event.endDate), "PPP") : "Pick a date"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={event.endDate ? new Date(event.endDate) : undefined}
+                  onSelect={(date) => {
+                    if (!event.startDate || isBefore(date, new Date(event.startDate))) {
+                      setErrors((prev) => ({ ...prev, endDate: "End date must be after start date" }));
+                      return;
+                    }
+                    setEvent({ ...event, endDate: date.toISOString() });
+                    clearError("endDate");
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+            {errors.endDate && <p className="text-error">{errors.endDate}</p>}
+          </div>
+        </div>
 
         {/* Categories */}
         <div>

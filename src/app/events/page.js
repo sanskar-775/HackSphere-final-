@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useSession, signIn } from "next-auth/react"; // Using useSession hook from next-auth
 import { toast } from "sonner";
 
 // Dynamically import components
@@ -9,6 +10,7 @@ const EventCard = dynamic(() => import("@/components/EventCard"), { ssr: false }
 const SkeletonEventCard = dynamic(() => import("@/components/SkeletonEventCard"), { ssr: false });
 
 export default function EventsPage() {
+  const { data: session, status } = useSession(); // Get session data using useSession
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,10 +29,22 @@ export default function EventsPage() {
 
   const platformOptions = ["All", "Hack Club", "Unstop", "Devpost", "User"];
 
+  // Redirect if not authenticated
   useEffect(() => {
-    setMounted(true);
-    fetchEvents();
-  }, []);
+    if (status === "loading") return; // Wait for the session to load
+    if (!session) {
+      toast.error("You must be logged in to access the events page.");
+      signIn("google"); // Redirect to login if not authenticated
+    }
+  }, [session, status]);
+
+  // Fetch events once the session is authenticated
+  useEffect(() => {
+    if (session) {
+      setMounted(true);
+      fetchEvents();
+    }
+  }, [session]);
 
   const fetchEvents = async () => {
     try {
@@ -45,7 +59,7 @@ export default function EventsPage() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted || status === "loading") return null;
 
   // Apply filters and sorting
   const filteredEvents = events

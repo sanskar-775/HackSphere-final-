@@ -54,7 +54,7 @@ export async function GET() {
       endDate: e.endDate,
       platform: e.opportunityType || "User",
       location: e.location || "Unknown",
-      image: e.image || "/global.jpg",
+      image: e.image || "/hacksphere/public/hacka.png",
     }));
 
     const allEvents = [...hackclubFormatted, ...unstopFormatted, ...devpostFormatted, ...localFormatted];

@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react"; // Correct import for NextAuth.js session
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Menu, Moon, Sun } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Navbar() {
-    const { data: session } = useSession();
+    const { data: session } = useSession(); // Get session data
     const [isOpen, setIsOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
 
@@ -43,9 +43,13 @@ export default function Navbar() {
                         <Link href="/about" className="text-gray-300 hover:text-primary">
                             About
                         </Link>
-                        <Link href="/host" className="text-gray-300 hover:text-primary">
-                            Host
-                        </Link>
+
+                        {/* Conditional Rendering of Host Link */}
+                        {session?.user && (
+                            <Link href="/host" className="text-gray-300 hover:text-primary">
+                                Host
+                            </Link>
+                        )}
 
                         {/* Authentication */}
                         {session?.user ? (
@@ -77,19 +81,10 @@ export default function Navbar() {
                                 Login
                             </Button>
                         )}
-
-                        {/* Dark Mode Toggle
-                        <button onClick={toggleDarkMode} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-                            {darkMode ? <Sun className="text-yellow-400" /> : <Moon className="text-gray-900" />}
-                        </button> */}
                     </div>
 
                     {/* Mobile Menu */}
                     <div className="md:hidden flex items-center">
-                        {/* Dark Mode Toggle in Mobile */}
-                        {/* <button onClick={toggleDarkMode} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 mr-4">
-                            {darkMode ? <Sun className="text-yellow-400" /> : <Moon className="text-gray-900" />}
-                        </button> */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon">
@@ -103,9 +98,14 @@ export default function Navbar() {
                                 <DropdownMenuItem asChild>
                                     <Link href="/about">About</Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/host">Host</Link>
-                                </DropdownMenuItem>
+
+                                {/* Conditional Rendering of Host Link in Mobile */}
+                                {session?.user && (
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/host">Host</Link>
+                                    </DropdownMenuItem>
+                                )}
+
                                 {session?.user ? (
                                     <>
                                         <DropdownMenuItem asChild>
