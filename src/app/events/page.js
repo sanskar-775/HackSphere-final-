@@ -1,16 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import EventCard from "@/components/EventCard";
-import SkeletonEventCard from "@/components/SkeletonEventCard";
+import dynamic from "next/dynamic";
+import { useSession } from "next-auth/react"; // Use useSession hook from next-auth
 import { toast } from "sonner";
 
+// Dynamically import components
+const EventCard = dynamic(() => import("@/components/EventCard"), { ssr: false });
+const SkeletonEventCard = dynamic(() => import("@/components/SkeletonEventCard"), { ssr: false });
+
 export default function EventsPage() {
+  const { data: session, status } = useSession(); // Get session data
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [platformFilter, setPlatformFilter] = useState("All");
   const [sortBy, setSortBy] = useState("recent");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   const sortOptions = [
     { value: "recent", label: "Recently Added" },
@@ -20,29 +27,39 @@ export default function EventsPage() {
 
   const platformOptions = ["All", "Hack Club", "Unstop", "Devpost", "User"];
 
+  // Redirect if not authenticated
   useEffect(() => {
-    const fetchAllEvents = async () => {
-      try {
-        const res = await fetch("/api/fetch-events");
-        if (!res.ok) throw new Error("Failed to fetch");
-        const data = await res.json();
-        setEvents(Array.isArray(data) ? data : []); // Ensure data is always an array
-      } catch (err) {
-        toast.error("Failed to load events.");
-        console.error(err);
-        setEvents([]); // Set to empty array on error
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (status === "loading") return; // Wait for session to load
+    if (!session) {
+      toast.error("You must be logged in to access the events page.");
+      window.location.href = "/login"; // Redirect to login page
+      return;
+    }
 
-    fetchAllEvents();
-  }, []);
+    // Fetch events once authenticated
+    fetchEvents();
+  }, [session, status]);
 
-  // Safely filter and sort events
-  const filteredEvents = (Array.isArray(events) ? events : [])
-    .filter((event) => 
-      event?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const fetchEvents = async () => {
+    try {
+      const res = await fetch("/api/fetch-events?page=1&limit=100");
+      if (!res.ok) throw new Error("Failed to fetch events");
+      const data = await res.json();
+      setEvents(Array.isArray(data) ? data : []);
+    } catch (err) {
+      toast.error("Failed to load events.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (status === "loading" || !session) return null;
+
+  // Apply filters and sorting
+  const filteredEvents = events
+    .filter((event) =>
+      event.name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((event) =>
       platformFilter === "All" ? true : event?.platform === platformFilter
@@ -61,9 +78,25 @@ export default function EventsPage() {
       }
     });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
+  const paginatedEvents = filteredEvents.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const changePage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-200 py-10 px-6">
-      <h1 className="text-3xl font-bold text-center mb-6 glow-gradient-text">Explore Hackathons</h1>
+      <h1 className="text-3xl font-bold text-center mb-6 glow-gradient-text">
+        Explore Hackathons
+      </h1>
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -72,12 +105,18 @@ export default function EventsPage() {
           placeholder="Search events..."
           className="input input-bordered w-full md:max-w-sm"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
         />
         <select
           className="select select-bordered w-full md:w-48"
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
+          onChange={(e) => {
+            setSortBy(e.target.value);
+            setCurrentPage(1);
+          }}
         >
           {sortOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -87,11 +126,15 @@ export default function EventsPage() {
         </select>
       </div>
 
+      {/* Platform Filters */}
       <div className="flex flex-wrap gap-2 justify-center mb-8">
         {platformOptions.map((platform) => (
           <button
             key={platform}
-            onClick={() => setPlatformFilter(platform)}
+            onClick={() => {
+              setPlatformFilter(platform);
+              setCurrentPage(1);
+            }}
             className={`px-4 py-1 rounded-full border text-sm transition-all ${
               platformFilter === platform
                 ? "bg-primary text-white border-primary"
@@ -103,26 +146,57 @@ export default function EventsPage() {
         ))}
       </div>
 
-      {/* Event Cards or Loader */}
+      {/* Event Cards */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, idx) => (
             <SkeletonEventCard key={idx} />
           ))}
         </div>
-      ) : filteredEvents.length === 0 ? (
-        <p className="text-center text-gray-400">
-          {events.length === 0 ? "No events available." : "No events match your filters."}
-        </p>
+      ) : paginatedEvents.length === 0 ? (
+        <p className="text-center text-gray-400">No events match your filters.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredEvents.map((event) => (
-            <EventCard 
-              key={event.id || event._id || Math.random().toString(36).substring(2,9)}
-              event={event} 
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            {paginatedEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="flex justify-center items-center gap-2 mt-10">
+            <button
+              onClick={() => changePage(currentPage - 1)}
+              className="btn btn-sm"
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const pageNum = idx + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => changePage(pageNum)}
+                  className={`btn btn-sm ${
+                    currentPage === pageNum ? "btn-primary" : "btn-outline"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => changePage(currentPage + 1)}
+              className="btn btn-sm"
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

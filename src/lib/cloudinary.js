@@ -1,9 +1,16 @@
-import { v2 as cloudinary } from "cloudinary";
+"use client";
+import { CldImage } from "next-cloudinary";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-export default cloudinary;
+export default function Page() {
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-black">
+      <CldImage
+        src="cld-sample-5" // Replace with your own Cloudinary public ID
+        width={500}
+        height={500}
+        crop="fill" // Or "thumb", "crop", etc.
+        alt="Sample Cloudinary Image"
+      />
+    </div>
+  );
+}

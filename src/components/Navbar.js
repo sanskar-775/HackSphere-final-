@@ -2,29 +2,58 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react"; // Correct import for NextAuth.js session
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, Moon, Sun } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { gsap } from "gsap";
 
 export default function Navbar() {
-    const { data: session } = useSession();
+    const { data: session } = useSession(); // Get session data
     const [isOpen, setIsOpen] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
+    const router = useRouter(); // Next.js router for navigation
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        document.documentElement.setAttribute("data-theme", savedTheme);
-        setDarkMode(savedTheme === "dark");
-    }, []);
+        function breakTheText() {
+            let h2 = document.querySelector("h2");
+            if (!h2) return;
+            
+            let h2Text = h2.textContent;
+            let splittedText = h2Text.split("");
+            let halfIndex = Math.floor(splittedText.length / 2);
+            let clutter = "";
 
-    const toggleDarkMode = () => {
-        const newTheme = darkMode ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-        setDarkMode(!darkMode);
-    };
+            splittedText.forEach((letter, idx) => {
+                if (idx <= halfIndex) {
+                    clutter += `<span class="a">${letter}</span>`;
+                } else {
+                    clutter += `<span class="b">${letter}</span>`;
+                }
+            });
+
+            h2.innerHTML = clutter;
+        }
+
+        breakTheText();
+
+        gsap.from("h2 .a", {
+            y: 70,
+            duration: 1,
+            delay: 0.3,
+            opacity: 0,
+            stagger: 0.15,
+        });
+
+        gsap.from("h2 .b", {
+            y: 70,
+            duration: 1,
+            delay: 0.3,
+            opacity: 0,
+            stagger: -0.15,
+        });
+    }, []);
 
     return (
         <nav className="fixed top-0 left-0 w-full bg-black/30 dark:bg-gray-900/30 backdrop-blur-lg shadow-md z-50">
@@ -32,33 +61,47 @@ export default function Navbar() {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <Link href="/" className="text-2xl font-bold text-primary">
-                        HackSphere
+                        <h2>HackSphere</h2>
                     </Link>
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex space-x-6 items-center">
-                        <Link href="/events" className="text-gray-300 hover:text-primary">
+                        {/* Redirect to Login if Not Authenticated */}
+                        <button
+                            className="text-gray-300 hover:text-cyan-800 nav-link"
+                            onClick={() => {
+                                if (session) {
+                                    router.push("/events");
+                                } else {
+                                    router.push("/auth/login");
+                                }
+                            }}
+                        >
                             Events
-                        </Link>
-                        <Link href="/about" className="text-gray-300 hover:text-primary">
+                        </button>
+                        <Link href="/about" className="text-gray-300 hover:text-cyan-800 nav-link">
                             About
                         </Link>
-                        <Link href="/host" className="text-gray-300 hover:text-primary">
-                            Host
-                        </Link>
+
+                        {/* Conditional Rendering of Host Link */}
+                        {session && (
+                            <Link href="/host" className="text-gray-300 hover:text-cyan-400 nav-link">
+                                Host
+                            </Link>
+                        )}
 
                         {/* Authentication */}
-                        {session?.user ? (
+                        {session ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Avatar className="cursor-pointer">
-                                        <AvatarImage src={session.user.image || "/default-avatar.png"} alt="User Avatar" />
-                                        <AvatarFallback>{session.user.name?.charAt(0) || "U"}</AvatarFallback>
+                                        <AvatarImage src={session.user?.image || "/default-avatar.png"} alt="User Avatar" />
+                                        <AvatarFallback>{session.user?.name?.charAt(0) || "U"}</AvatarFallback>
                                     </Avatar>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
                                     <DropdownMenuItem>
-                                        <span className="text-gray-900 dark:text-white">{session.user.name}</span>
+                                        <span className="text-gray-900 dark:text-white">{session.user?.name}</span>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem>
                                         <Link href="/dashboard">Dashboard</Link>
@@ -70,25 +113,15 @@ export default function Navbar() {
                             </DropdownMenu>
                         ) : (
                             <Link href="/auth/login">
-                            <Button variant="outline" className="text-gray-300 hover:text-primary">
-                                Login
-                            </Button>
-                        </Link>
-                        
+                                <Button variant="outline" className="text-gray-300 hover:text-primary">
+                                    Login
+                                </Button>
+                            </Link>
                         )}
-
-                        {/* Dark Mode Toggle
-                        <button onClick={toggleDarkMode} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-                            {darkMode ? <Sun className="text-yellow-400" /> : <Moon className="text-gray-900" />}
-                        </button> */}
                     </div>
 
                     {/* Mobile Menu */}
                     <div className="md:hidden flex items-center">
-                        {/* Dark Mode Toggle in Mobile */}
-                        {/* <button onClick={toggleDarkMode} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 mr-4">
-                            {darkMode ? <Sun className="text-yellow-400" /> : <Moon className="text-gray-900" />}
-                        </button> */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon">
@@ -96,16 +129,32 @@ export default function Navbar() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                                {/* Redirect to Login if Not Authenticated */}
                                 <DropdownMenuItem asChild>
-                                    <Link href="/events">Events</Link>
+                                    <button
+                                        onClick={() => {
+                                            if (session) {
+                                                router.push("/events");
+                                            } else {
+                                                router.push("/auth/login");
+                                            }
+                                        }}
+                                    >
+                                        Events
+                                    </button>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link href="/about">About</Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/host">Host</Link>
-                                </DropdownMenuItem>
-                                {session?.user ? (
+
+                                {/* Conditional Rendering of Host Link in Mobile */}
+                                {session && (
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/host">Host</Link>
+                                    </DropdownMenuItem>
+                                )}
+
+                                {session ? (
                                     <>
                                         <DropdownMenuItem asChild>
                                             <Link href="/dashboard">Dashboard</Link>
@@ -114,9 +163,8 @@ export default function Navbar() {
                                     </>
                                 ) : (
                                     <DropdownMenuItem asChild>
-                                    <Link href="/auth/login">Login</Link>
+                                        <Link href="/auth/login">Login</Link>
                                     </DropdownMenuItem>
-                                
                                 )}
                             </DropdownMenuContent>
                         </DropdownMenu>

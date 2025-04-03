@@ -61,18 +61,16 @@ export async function GET() {
         }))
       : [];
 
-    const localFormatted = Array.isArray(localEvents)
-      ? localEvents.map((e) => ({
-          id: e._id.toString(),
-          name: e.opportunityTitle,
-          url: e.websiteUrl || "#",
-          startDate: e.startDate,
-          endDate: e.endDate,
-          platform: e.opportunityType || "User",
-          location: e.location || "Unknown",
-          image: e.image || "/global.jpg",
-        }))
-      : [];
+    const localFormatted = localEvents.map((e) => ({
+      id: e._id.toString(),
+      name: e.opportunityTitle,
+      url: e.websiteUrl || "#",
+      startDate: e.startDate,
+      endDate: e.endDate,
+      platform: e.opportunityType || "User",
+      location: e.location || "Unknown",
+      image: e.image || "/hacksphere/public/hacka.png",
+    }));
 
     const allEvents = [...hackclubFormatted, ...unstopFormatted, ...devpostFormatted, ...localFormatted];
 

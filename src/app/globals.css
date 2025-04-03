@@ -273,3 +273,25 @@ html {
     transform: translateX(150%);
   }
 }
+.nav-link {
+  position: relative;
+  display: inline-block;
+  text-decoration: none; /* Remove default underline */
+  color: inherit; /* Inherit text color */
+  padding-bottom: 2px; /* Add padding for the line */
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px; /* Line thickness */
+  background-color: rgb(0, 183, 255); /* Line color */
+  transition: width 0.3s ease; /* Animation for the line */
+}
+
+.nav-link:hover::after {
+  width: 100%; /* On hover, the line will span the full width of the link */
+}

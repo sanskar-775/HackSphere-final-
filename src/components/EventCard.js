@@ -19,14 +19,15 @@ export default function EventCard({ event, showRemove = false }) {
     User: "bg-gray-500",
   };
 
+  // ✅ Use only event.id (unique & safe)
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-    setBookmarked(saved.includes(event.id || event.eventId));
-  }, [event.id, event.eventId]);
+    setBookmarked(saved.includes(event.id));
+  }, [event.id]);
 
   const removeBookmark = async () => {
     try {
-      await fetch(`/api/bookmark?eventId=${event.eventId}`, { method: "DELETE" });
+      await fetch(`/api/bookmark?eventId=${event.id}`, { method: "DELETE" });
       toast.success("Bookmark removed");
       window.location.reload();
     } catch (err) {
@@ -40,14 +41,11 @@ export default function EventCard({ event, showRemove = false }) {
       return;
     }
 
-    const eventId = event.id || event.eventId;
-
     try {
       if (bookmarked) {
-        await fetch(`/api/bookmark?eventId=${eventId}`, { method: "DELETE" });
-        localStorage.setItem("bookmarks", JSON.stringify(
-          JSON.parse(localStorage.getItem("bookmarks") || "[]").filter(id => id !== eventId)
-        ));
+        await fetch(`/api/bookmark?eventId=${event.id}`, { method: "DELETE" });
+        const updated = JSON.parse(localStorage.getItem("bookmarks") || "[]").filter(id => id !== event.id);
+        localStorage.setItem("bookmarks", JSON.stringify(updated));
         setBookmarked(false);
         toast.success("Removed from bookmarks");
       } else {
@@ -56,9 +54,8 @@ export default function EventCard({ event, showRemove = false }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ event }),
         });
-        localStorage.setItem("bookmarks", JSON.stringify([
-          ...new Set([...JSON.parse(localStorage.getItem("bookmarks") || "[]"), eventId])
-        ]));
+        const current = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+        localStorage.setItem("bookmarks", JSON.stringify([...new Set([...current, event.id])]));
         setBookmarked(true);
         toast.success("Bookmarked!");
       }
@@ -80,7 +77,7 @@ export default function EventCard({ event, showRemove = false }) {
           {event.platform}
         </div>
 
-        {/* Bookmark or Remove */}
+        {/* Bookmark or Remove Button */}
         {showRemove ? (
           <button
             onClick={removeBookmark}
@@ -102,7 +99,7 @@ export default function EventCard({ event, showRemove = false }) {
         )}
 
         {/* Card Content */}
-        <Link href={event.url} target="_blank">
+        <Link href={event.url} target="_blank" rel="noopener noreferrer">
           <img
             src={event.image || "/placeholder.jpg"}
             alt={event.name}
