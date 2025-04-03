@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function Footer() {
+  
   return (
     <footer className="bg-black text-white py-10 px-6 md:px-12">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">

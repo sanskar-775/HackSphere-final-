@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react"; // Correct import for NextAuth.js session
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, Moon, Sun } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Navbar() {
@@ -17,6 +17,21 @@ export default function Navbar() {
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
         setDarkMode(savedTheme === "dark");
+
+        // Preload routes (pages) dynamically
+        const preloadPages = () => {
+            if (window.location.pathname !== '/events') {
+                import('@/app/events/page');
+            }
+            if (window.location.pathname !== '/about') {
+                import('@/app/about/page');
+            }
+            if (window.location.pathname !== '/host') {
+                import('@/app/host/page');
+            }
+        };
+
+        preloadPages(); // Call preload when Navbar loads
     }, []);
 
     const toggleDarkMode = () => {
@@ -37,16 +52,16 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex space-x-6 items-center">
-                        <Link href="/events" className="text-gray-300 hover:text-primary">
+                        <Link href="/events" className="text-gray-300 hover:text-cyan-400">
                             Events
                         </Link>
-                        <Link href="/about" className="text-gray-300 hover:text-primary">
+                        <Link href="/about" className="text-gray-300 hover:text-cyan-400">
                             About
                         </Link>
 
                         {/* Conditional Rendering of Host Link */}
                         {session?.user && (
-                            <Link href="/host" className="text-gray-300 hover:text-primary">
+                            <Link href="/host" className="text-gray-300 hover:text-cyan-400">
                                 Host
                             </Link>
                         )}
