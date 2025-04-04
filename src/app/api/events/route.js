@@ -142,25 +142,58 @@ export async function POST(req) {
       );
     }
 
-    // Process file upload (example - implement your actual storage)
-    const file = formData.get("file");
+    // Process file upload or use default image
+    const file = formData.get("opportunityLogo"); // Changed from "file" to match your form field name
     let imageData = null;
     
-    if (file) {
-      // In production: Upload to Cloudinary/S3/etc.
+    if (file && file.size > 0) {
+      // Basic validation for image file
+      if (!file.type.startsWith('image/')) {
+        return NextResponse.json(
+          { error: "Only image files are allowed" },
+          { status: 400 }
+        );
+      }
+
+      // In production, you would upload to Cloudinary/S3/etc.
+      // For now, we'll just reference the default image
       imageData = {
-        url: "/uploads/" + file.name,
-        publicId: "temp_" + Date.now()
+        url: "/hacka.png", // Default image path in public folder
+        publicId: "default_hacka",
+        isDefault: true // Flag to indicate this is the default image
+      };
+      
+      // In production, you would replace the above with actual upload code:
+      // const uploadResult = await uploadToCloudinary(file);
+      // imageData = {
+      //   url: uploadResult.secure_url,
+      //   publicId: uploadResult.public_id
+      // };
+    } else {
+      // Use default image if no file was uploaded
+      imageData = {
+        url: "/hacka.png",
+        publicId: "default_hacka",
+        isDefault: true
       };
     }
+
+    // Parse array fields safely
+    const parseArrayField = (field) => {
+      try {
+        return field ? JSON.parse(field) : [];
+      } catch {
+        return [];
+      }
+    };
 
     // Create new event with all host page fields
     const newEvent = new Event({
       ...data,
       opportunityLogo: imageData,
-      categories: JSON.parse(data.categories || "[]"),
-      skills: JSON.parse(data.skills || "[]"),
-      timeline: JSON.parse(data.timeline || "[]"),
+      categories: parseArrayField(data.categories),
+      skills: parseArrayField(data.skills),
+      timeline: parseArrayField(data.timeline),
       maxTeams: data.maxTeams ? parseInt(data.maxTeams) : null,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -173,9 +206,13 @@ export async function POST(req) {
       event: {
         id: newEvent._id.toString(),
         name: newEvent.opportunityTitle,
-        url: newEvent.websiteUrl,
+        url: newEvent.websiteUrl || "#",
         startDate: newEvent.startDate,
         endDate: newEvent.endDate,
+        image: newEvent.opportunityLogo?.url || "/hacka.png", // Ensure image URL
+        categories: newEvent.categories,
+        skills: newEvent.skills,
+        about: newEvent.aboutOpportunity,
         // Include all other relevant fields
         ...newEvent.toObject()
       }

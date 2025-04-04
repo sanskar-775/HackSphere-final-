@@ -254,17 +254,27 @@ export default function HostPage() {
                     onChange={handleChange}
                     className="bg-gray-800/70 border-gray-700 text-white file:bg-blue-900/50 file:text-blue-200 file:border-0 hover:file:bg-blue-800/70"
                   />
-                  {previewImage && (
-                    <div className="w-16 h-16 rounded-md overflow-hidden border border-gray-700">
-                      <Image
-                        src={previewImage || "/placeholder.svg"}
-                        alt="Preview"
-                        width={64}
-                        height={64}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  )}
+                 {previewImage ? (
+  <div className="w-16 h-16 rounded-md overflow-hidden border border-gray-700">
+    <Image 
+      src={previewImage} 
+      alt="Preview" 
+      width={64} 
+      height={64} 
+      className="object-cover w-full h-full"
+    />
+  </div>
+) : (
+  <div className="w-16 h-16 rounded-md overflow-hidden border border-gray-700 bg-gray-800 flex items-center justify-center">
+    <Image 
+      src="/hacka.png" 
+      alt="Default Hackathon" 
+      width={64} 
+      height={64} 
+      className="object-cover w-full h-full"
+    />
+  </div>
+)}
                 </div>
                 {errors.opportunityLogo && <p className="mt-1 text-sm text-red-400">{errors.opportunityLogo}</p>}
               </div>

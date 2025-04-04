@@ -61,16 +61,21 @@ export async function GET() {
         }))
       : [];
 
-    const localFormatted = localEvents.map((e) => ({
-      id: e._id.toString(),
-      name: e.opportunityTitle,
-      url: e.websiteUrl || "#",
-      startDate: e.startDate,
-      endDate: e.endDate,
-      platform: e.opportunityType || "User",
-      location: e.location || "Unknown",
-      image: e.image || "/hacksphere/public/hacka.png",
-    }));
+      const localFormatted = localEvents.map((e) => ({
+        id: e._id.toString(),
+        name: e.opportunityTitle,
+        url: e.websiteUrl || "#",
+        startDate: e.startDate,
+        endDate: e.endDate,
+        platform: e.opportunityType || "User",
+        location: e.location || "Online",
+        // Use the uploaded image if available, otherwise fall back to hacka.png
+        image: e.opportunityLogo?.url || "/hacka.png",
+        categories: e.categories,
+        skills: e.skills,
+        about: e.aboutOpportunity,
+        source: "local"
+      }));
 
     const allEvents = [...hackclubFormatted, ...unstopFormatted, ...devpostFormatted, ...localFormatted];
 
