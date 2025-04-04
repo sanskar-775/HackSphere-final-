@@ -103,31 +103,45 @@ export default function HostPage() {
   const validateField = (name, value) => {
     const newErrors = { ...errors }
     delete newErrors[name]
-
+  
+    // Required field validation
     if (requiredFields.includes(name) && !value) {
       newErrors[name] = "This field is required"
     }
-
+  
+    // Title validation - no numbers
     if (name === "opportunityTitle" && value && /\d/.test(value)) {
       newErrors[name] = "No numbers allowed in title"
     }
-
+  
+    // Organization validation - no numbers
     if (name === "organization" && value && /\d/.test(value)) {
       newErrors[name] = "No numbers allowed in organization"
     }
-
+  
+    // About Opportunity validation - no numbers
+    if (name === "aboutOpportunity" && value && /\d/.test(value)) {
+      newErrors[name] = "No numbers allowed in description"
+    }
+  
+    // Website URL validation
+    if (name === "websiteUrl" && value && !/^https?:\/\/.+\..+/.test(value)) {
+      newErrors[name] = "Please enter a valid URL (e.g., https://example.com)"
+    }
+  
+    // Date validations
     if (name === "startDate" && value && isPast(new Date(value))) {
       newErrors[name] = "Start date cannot be in the past"
     }
-
+  
     if (name === "endDate" && value && event.startDate && isBefore(new Date(value), new Date(event.startDate))) {
       newErrors[name] = "End date must be after start date"
     }
-
+  
     if (name === "categories" && value.length === 0) {
       newErrors[name] = "Select at least one category"
     }
-
+  
     setErrors(newErrors)
   }
 
@@ -183,7 +197,7 @@ export default function HostPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || "Failed to submit")
 
-      toast.success("Hackathon created successfully! Your hackathon is now live for participants to see!", {
+      toast.success("Hackathon created successfully!", {
         onClick: () => (window.location.href = `/events/${data.id}`),
         closeButton: true,
         closeOnClick: true,
@@ -482,16 +496,20 @@ export default function HostPage() {
               </div>
 
               {/* Website */}
-              <div className="space-y-2">
-                <Label className="text-blue-300">Website URL</Label>
-                <Input
-                  name="websiteUrl"
-                  value={event.websiteUrl}
-                  onChange={handleChange}
-                  className="bg-gray-800/70 border-gray-700 text-white focus:ring-blue-600 placeholder:text-gray-500"
-                  placeholder="https://hackyourfuture.com"
-                />
-              </div>
+              <Input
+  name="websiteUrl"
+  value={event.websiteUrl}
+  onChange={handleChange}
+  onBlur={(e) => validateField(e.target.name, e.target.value)}
+  className={cn(
+    "bg-gray-800/70 border-gray-700 text-white focus:ring-blue-600 placeholder:text-gray-500",
+    errors.websiteUrl && "border-red-500"
+  )}
+  placeholder="https://example.com"
+/>
+{errors.websiteUrl && (
+  <p className="mt-1 text-sm text-red-400">{errors.websiteUrl}</p>
+)}
 
               {/* Submit Button */}
               <div className="pt-4">
