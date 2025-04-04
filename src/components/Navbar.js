@@ -14,7 +14,23 @@ export default function Navbar() {
     const { data: session } = useSession(); // Get session data
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter(); // Next.js router for navigation
+    useEffect(() => {
 
+        // Preload routes (pages) dynamically
+        const preloadPages = () => {
+            if (window.location.pathname !== '/events') {
+                import('@/app/events/page');
+            }
+            if (window.location.pathname !== '/about') {
+                import('@/app/about/page');
+            }
+            if (window.location.pathname !== '/host') {
+                import('@/app/host/page');
+            }
+        };
+
+        preloadPages(); // Call preload when Navbar loads
+    }, []);
     useEffect(() => {
         function breakTheText() {
             let h2 = document.querySelector("h2");
