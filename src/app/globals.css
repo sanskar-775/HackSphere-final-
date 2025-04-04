@@ -295,3 +295,47 @@ html {
 .nav-link:hover::after {
   width: 100%; /* On hover, the line will span the full width of the link */
 }
+/* Add these styles to your globals.css file */
+
+/* React Toastify Dark Theme Customization */
+.Toastify__toast {
+  background-color: #1f2937 !important; /* dark gray background */
+  color: #f3f4f6 !important; /* light text */
+  border: 1px solid #374151 !important; /* border */
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.Toastify__toast-body {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.Toastify__progress-bar {
+  background: linear-gradient(to right, #1d4ed8, #3b82f6) !important; /* blue progress bar */
+}
+
+.Toastify__toast--success {
+  border-left: 4px solid #10b981 !important; /* green accent for success */
+}
+
+.Toastify__toast--error {
+  border-left: 4px solid #ef4444 !important; /* red accent for error */
+}
+
+.Toastify__toast--warning {
+  border-left: 4px solid #f59e0b !important; /* amber accent for warning */
+}
+
+.Toastify__toast--info {
+  border-left: 4px solid #3b82f6 !important; /* blue accent for info */
+}
+
+.Toastify__close-button {
+  color: #9ca3af !important; /* gray close button */
+  opacity: 0.7;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
