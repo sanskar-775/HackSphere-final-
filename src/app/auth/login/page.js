@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/ui/icons";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,7 +30,16 @@ export default function LoginPage() {
     setLoading(false);
 
     if (res?.error) {
-      alert("Invalid email or password.");
+      toast.error("Invalid email or password", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } else {
       router.push("/events");
     }
@@ -42,6 +52,20 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+
       {/* Animated background elements */}
       <div className="absolute inset-0 z-0 opacity-20">
         <div className="absolute top-0 left-0 w-32 h-32 bg-blue-500 rounded-full filter blur-3xl animate-pulse" />
@@ -123,7 +147,7 @@ export default function LoginPage() {
             </Button>
 
             <p className="text-center text-sm text-gray-400">
-              Don't have an account?{" "}
+              {`Don't have an account? `}
               <a
                 href="/auth/register"
                 className="font-medium text-blue-400 hover:text-blue-300 transition-colors"
